@@ -37,6 +37,14 @@ class ClassHelper
     }
 
     /**
+     * @return \ReflectionClass
+     */
+    public function getReflection()
+    {
+        return $this->reflection;
+    }
+
+    /**
      * @param string $name
      * @return null|string
      */
@@ -59,5 +67,17 @@ class ClassHelper
         $classType = '\\'.ltrim($classType, '\\').(isset($matches[3]) ? '[]' : '');
 
         return $this->propertyClassTypes[$name] = $classType;
+    }
+
+    /**
+     * @param object $object
+     * @param string $name
+     * @param mixed  $value
+     */
+    public function setProperty($object, $name, $value)
+    {
+        $property = $this->reflection->getProperty($name);
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
     }
 }
