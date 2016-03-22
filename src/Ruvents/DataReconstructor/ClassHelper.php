@@ -61,6 +61,11 @@ class ClassHelper
         return $this->propertyClassTypes[$name] = $classType;
     }
 
+    /**
+     * @param object $object
+     * @param string $name
+     * @param mixed  $value
+     */
     public function setProperty($object, $name, $value)
     {
         $property = $this->reflection->getProperty($name);

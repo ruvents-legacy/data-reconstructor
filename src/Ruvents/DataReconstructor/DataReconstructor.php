@@ -33,7 +33,7 @@ class DataReconstructor
      */
     public function reconstruct($data, $className = null)
     {
-        if (!isset($className)) {
+        if (!is_array($data) || !isset($className)) {
             return $data;
         }
 
