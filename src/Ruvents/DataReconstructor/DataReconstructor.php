@@ -63,7 +63,6 @@ class DataReconstructor
      */
     protected function reconstructObject(array $data, $className)
     {
-        $className = ltrim($className, '\\');
         $object = new $className;
 
         if ($object instanceof ReconstructInterface) {
@@ -87,11 +86,13 @@ class DataReconstructor
      */
     protected function getClassMap($className)
     {
+        $className = ltrim($className, '\\');
+
         if (isset($this->options['map'][$className])) {
             return $this->options['map'][$className];
-        } else {
-            return [];
         }
+
+        return [];
     }
 
     /**
