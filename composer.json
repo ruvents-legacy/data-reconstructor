@@ -9,6 +9,9 @@
     "autoload-dev": {
         "psr-4": {"": "tests/"}
     },
+    "require": {
+        "symfony/property-access": "^2.8"
+    },
     "require-dev": {
         "phpunit/phpunit": "^5.2"
     },
@@ -16,8 +19,5 @@
         "branch-alias": {
             "dev-master": "1.0-dev"
         }
-    },
-    "require": {
-        "symfony/property-access": "^2.8"
     }
 }
