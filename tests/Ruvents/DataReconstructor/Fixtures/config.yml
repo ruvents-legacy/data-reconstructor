@@ -1,14 +1,1 @@
-map:
-    Ruvents\DataReconstructor\Fixtures\TestClass1:
-        class1: Ruvents\DataReconstructor\Fixtures\TestClass1[]
-        class2: Ruvents\DataReconstructor\Fixtures\TestClass2
-
-    Ruvents\DataReconstructor\Fixtures\TestClass2:
-        class3: Ruvents\DataReconstructor\Fixtures\TestClass3
-
-map2:
-    Class:
-        offset: ~
-        offset2: prop
-        offset3: new Class[]
-        offset4: call()
+map: []

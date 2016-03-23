@@ -14,7 +14,7 @@
     },
     "require-dev": {
         "symfony/yaml": "^2.8",
-        "phpunit/phpunit": "^5.2"
+        "phpunit/phpunit": "^4.0"
     },
     "extra": {
         "branch-alias": {

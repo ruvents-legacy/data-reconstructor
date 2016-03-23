@@ -217,7 +217,7 @@ object(Model\Band)[3]
 
 Data constructor uses [The Symfony PropertyAccess Component](http://symfony.com/doc/current/components/property_access/index.html) to access the properies of a constructed class.
 
-This means that you can have private and protected properies with setters like this:
+This means that along with public properties you can have private and protected properies with appropriate setters or even a magic `__set` method:
 
 ```php
 <?php
@@ -232,6 +232,11 @@ class Instrument
     private $id;
 
     /**
+     * @var string
+     */
+    private $title;
+
+    /**
      * @param int $id
      * @return $this
      */
@@ -241,8 +246,19 @@ class Instrument
 
         return $this;
     }
+
+    /**
+     * @param string $property
+     * @param mixed  $value
+     */
+    public function __set($property, $value)
+    {
+        $this->$property = $value;
+    }
 }
 ```
+
+Nonexistent and nonaccesible properties will not be filled with data without throwing any errors.
 
 ## Gain control over the whole process
 
