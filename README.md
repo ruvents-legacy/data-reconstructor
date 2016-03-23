@@ -212,3 +212,81 @@ object(Model\Band)[3]
           public 'name' => string 'Matt Sorum' (length=10)
           public 'instruments' => null
 ```
+
+## Property Access
+
+Data constructor uses [The Symfony PropertyAccess Component](http://symfony.com/doc/current/components/property_access/index.html) to access the properies of a constructed class.
+
+This means that you can have private and protected properies with setters like this:
+
+```php
+<?php
+
+namespace Model;
+
+class Instrument
+{
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @param int $id
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+}
+```
+
+## Gain control over the whole process
+
+If you wish to use your own logic for reconstructing process, you can implement the `Ruvents\DataReconstructor\ReconstructInterface` interface:
+
+```php
+<?php
+
+namespace Model;
+
+use Ruvents\DataReconstructor\ReconstructInterface;
+use Ruvents\DataReconstructor\DataReconstructor;
+
+class Musician implements ReconstructInterface
+{
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @inheritdoc
+     */
+    public function reconstruct(&$data, DataReconstructor $dataReconstructor) {
+        $data['name'] = 'Cool guy Mr. '.$data['name'];
+    }
+}
+
+class Instrument implements ReconstructInterface
+{
+    /**
+     * @var int
+     */
+    private $id;
+
+    /**
+     * @inheritdoc
+     */
+    public function reconstruct(&$data, DataReconstructor $dataReconstructor) {
+        $this->id = (int)$data['id'];
+
+        return false;
+    }
+}
+```
+
+Return `false` to finish the reconstruction of this object.

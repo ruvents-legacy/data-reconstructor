@@ -19,7 +19,7 @@ class TestClass3 implements ReconstructInterface
     /**
      * @inheritdoc
      */
-    public function reconstruct($data, DataReconstructor $dataReconstructor)
+    public function reconstruct(&$data, DataReconstructor $dataReconstructor)
     {
         $this->data = $data;
     }

@@ -66,9 +66,9 @@ class DataReconstructor
         $object = new $className;
 
         if ($object instanceof ReconstructInterface) {
-            $object->reconstruct($data, $this);
-
-            return $object;
+            if ($object->reconstruct($data, $this) === false) {
+                return $object;
+            }
         }
 
         if (empty($data) || !is_array($data)) {

@@ -12,5 +12,5 @@ interface ReconstructInterface
      * @param mixed             $data
      * @param DataReconstructor $dataReconstructor
      */
-    public function reconstruct($data, DataReconstructor $dataReconstructor);
+    public function reconstruct(&$data, DataReconstructor $dataReconstructor);
 }
