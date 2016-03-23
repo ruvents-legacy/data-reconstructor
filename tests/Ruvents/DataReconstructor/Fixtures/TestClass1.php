@@ -16,5 +16,5 @@ class TestClass1
     /**
      * @var \Ruvents\DataReconstructor\Fixtures\TestClass2
      */
-    protected $class2;
+    public $class2;
 }

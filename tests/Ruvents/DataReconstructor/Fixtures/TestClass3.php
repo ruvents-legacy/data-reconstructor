@@ -14,12 +14,12 @@ class TestClass3 implements ReconstructInterface
     /**
      * @var array
      */
-    private $data;
+    public $data;
 
     /**
      * @inheritdoc
      */
-    public function __construct(DataReconstructor $dataReconstructor, array $data)
+    public function reconstruct(DataReconstructor $dataReconstructor, array $data)
     {
         $this->data = $data;
     }

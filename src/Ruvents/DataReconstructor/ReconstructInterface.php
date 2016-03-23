@@ -12,5 +12,5 @@ interface ReconstructInterface
      * @param DataReconstructor $dataReconstructor
      * @param array             $data
      */
-    public function __construct(DataReconstructor $dataReconstructor, array $data);
+    public function reconstruct(DataReconstructor $dataReconstructor, array $data);
 }

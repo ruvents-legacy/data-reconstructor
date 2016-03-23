@@ -16,5 +16,8 @@
         "branch-alias": {
             "dev-master": "1.0-dev"
         }
+    },
+    "require": {
+        "symfony/property-access": "^2.8"
     }
 }
