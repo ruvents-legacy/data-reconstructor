@@ -13,6 +13,7 @@
         "symfony/property-access": "^2.8"
     },
     "require-dev": {
+        "symfony/yaml": "^2.8",
         "phpunit/phpunit": "^5.2"
     },
     "extra": {
