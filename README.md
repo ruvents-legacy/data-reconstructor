@@ -172,7 +172,9 @@ Reconstruct data by passing the name of the initial class:
 use Ruvents\DataReconstructor\DataReconstructor;
 
 $reconstructor = new DataReconstructor($config);
+
 $data = $reconstructor->reconstruct($rawData, 'Model\Band');
+
 var_dump($data);
 ```
 
