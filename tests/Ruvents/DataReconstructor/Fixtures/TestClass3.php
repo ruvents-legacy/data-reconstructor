@@ -12,15 +12,23 @@ use Ruvents\DataReconstructor\ReconstructInterface;
 class TestClass3 implements ReconstructInterface
 {
     /**
+     * @var mixed
+     */
+    private $data;
+
+    /**
      * @var array
      */
-    public $data;
+    private $map;
 
     /**
      * @inheritdoc
      */
-    public function reconstruct(&$data, DataReconstructor $dataReconstructor)
+    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map)
     {
         $this->data = $data;
+        $this->map = $map;
+
+        return false;
     }
 }

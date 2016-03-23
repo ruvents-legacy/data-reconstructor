@@ -246,7 +246,7 @@ class Instrument
 
 ## Gain control over the whole process
 
-If you wish to use your own logic for reconstructing process, you can implement the `Ruvents\DataReconstructor\ReconstructInterface` interface:
+If you wish to use your own logic, you can implement the `Ruvents\DataReconstructor\ReconstructInterface` interface:
 
 ```php
 <?php
@@ -259,14 +259,9 @@ use Ruvents\DataReconstructor\DataReconstructor;
 class Musician implements ReconstructInterface
 {
     /**
-     * @var int
-     */
-    private $id;
-
-    /**
      * @inheritdoc
      */
-    public function reconstruct(&$data, DataReconstructor $dataReconstructor) {
+    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map) {
         $data['name'] = 'Cool guy Mr. '.$data['name'];
     }
 }
@@ -281,7 +276,7 @@ class Instrument implements ReconstructInterface
     /**
      * @inheritdoc
      */
-    public function reconstruct(&$data, DataReconstructor $dataReconstructor) {
+    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map) {
         $this->id = (int)$data['id'];
 
         return false;
@@ -289,4 +284,6 @@ class Instrument implements ReconstructInterface
 }
 ```
 
-Return `false` to finish the reconstruction of this object.
+Return `false` to finish reconstruction of the current object.
+
+You can also use `$dataReconstructor->reconstruct($data, $className)` to reconstruct other pieces of data from inside the implemented method.

@@ -33,57 +33,13 @@ class DataReconstructor
     }
 
     /**
-     * @param mixed  $data
-     * @param string $className
-     * @return mixed
+     * @return array
      */
-    public function reconstruct($data, $className = null)
+    public function getOptions()
     {
-        if (!isset($className)) {
-            return $data;
-        }
-
-        // Class[]
-        if (substr($className, -2) === '[]') {
-            foreach ($data as &$value) {
-                $value = $this->reconstructObject(substr($className, 0, -2), $value);
-            }
-
-            return $data;
-        }
-
-        // Class
-        return $this->reconstructObject($className, $data);
+        return $this->options;
     }
-
-    /**
-     * @param string $className
-     * @param mixed  $data
-     * @return object
-     */
-    protected function reconstructObject($className, $data = null)
-    {
-        $object = new $className;
-
-        if ($object instanceof ReconstructInterface) {
-            if ($object->reconstruct($data, $this) === false) {
-                return $object;
-            }
-        }
-
-        if (empty($data) || !is_array($data)) {
-            return $object;
-        }
-
-        $map = $this->getClassMap($className);
-
-        foreach ($data as $property => $value) {
-            $this->writeProperty($object, $property, $value, $map);
-        }
-
-        return $object;
-    }
-
+    
     /**
      * @param string $className
      * @return array
@@ -98,20 +54,76 @@ class DataReconstructor
 
         return [];
     }
+    
+    /**
+     * @param mixed  $data
+     * @param string $className
+     * @return mixed
+     */
+    public function reconstruct($data, $className = null)
+    {
+        if (!isset($className)) {
+            return $data;
+        }
+
+        // Class[]
+        if (substr($className, -2) === '[]') {
+            $className = substr($className, 0, -2);
+            $map = $this->getClassMap($className);
+
+            foreach ($data as &$value) {
+                $value = $this->reconstructObject($value, $className, $map);
+            }
+
+            return $data;
+        }
+
+        // Class
+        $map = $this->getClassMap($className);
+
+        return $this->reconstructObject($data, $className, $map);
+    }
+
+    /**
+     * @param mixed  $data
+     * @param string $className
+     * @param array  $map
+     * @return object
+     */
+    protected function reconstructObject($data, $className, array $map)
+    {
+        $object = new $className;
+
+        if ($object instanceof ReconstructInterface) {
+            if (false === $object->reconstruct($this, $data, $map)) {
+                return $object;
+            }
+        }
+
+        if (empty($data) || !is_array($data)) {
+            return $object;
+        }
+
+        foreach ($data as $property => $value) {
+            $propertyClassName = isset($map[$property]) ? $map[$property] : null;
+            $this->writeProperty($object, $property, $value, $propertyClassName);
+        }
+
+        return $object;
+    }
 
     /**
      * @param object $object
      * @param string $property
      * @param mixed  $value
-     * @param array  $map
+     * @param string $propertyClassName
      */
-    protected function writeProperty($object, $property, $value, array $map = [])
+    protected function writeProperty($object, $property, $value, $propertyClassName)
     {
         if (!$this->propertyAccessor->isWritable($object, $property)) {
             return;
         }
 
-        $propertyClassName = isset($map[$property]) ? $map[$property] : null;
         $value = $this->reconstruct($value, $propertyClassName);
 
         $this->propertyAccessor->setValue($object, $property, $value);
