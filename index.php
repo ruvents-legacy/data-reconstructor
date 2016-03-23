@@ -22,6 +22,7 @@ $result = $reconstructor->reconstruct(
         'class2' => [
             'int' => 1,
             'class3' => ['key' => 'val'],
+            'date' => '2016-03-23T16:33:15+03:00',
         ],
     ],
     TestClass1::class

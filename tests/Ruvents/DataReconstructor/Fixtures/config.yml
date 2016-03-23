@@ -5,3 +5,4 @@ map:
 
     Ruvents\DataReconstructor\Fixtures\TestClass2:
         class3: Ruvents\DataReconstructor\Fixtures\TestClass3
+        date: DateTime

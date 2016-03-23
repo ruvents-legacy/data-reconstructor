@@ -16,11 +16,15 @@ class TestClass3 implements ReconstructInterface
      */
     public $data;
 
+    public $key;
+
     /**
      * @inheritdoc
      */
-    public function reconstruct(DataReconstructor $dataReconstructor, array $data)
+    public function reconstruct($data, DataReconstructor $dataReconstructor)
     {
         $this->data = $data;
+
+        return false;
     }
 }

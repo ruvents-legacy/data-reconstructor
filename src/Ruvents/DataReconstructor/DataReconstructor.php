@@ -39,35 +39,39 @@ class DataReconstructor
      */
     public function reconstruct($data, $className = null)
     {
-        if (!is_array($data) || !isset($className)) {
+        if (!isset($className)) {
             return $data;
         }
 
         // Class[]
         if (substr($className, -2) === '[]') {
             foreach ($data as &$value) {
-                $value = $this->reconstructObject($value, substr($className, 0, -2));
+                $value = $this->reconstructObject(substr($className, 0, -2), $value);
             }
 
             return $data;
         }
 
         // Class
-        return $this->reconstructObject($data, $className);
+        return $this->reconstructObject($className, $data);
     }
 
     /**
-     * @param array  $data
      * @param string $className
+     * @param mixed  $data
      * @return object
      */
-    protected function reconstructObject(array $data, $className)
+    protected function reconstructObject($className, $data = null)
     {
-        $object = new $className;
+        $object = new $className($data);
 
         if ($object instanceof ReconstructInterface) {
-            $object->reconstruct($this, $data);
+            if ($object->reconstruct($data, $this) === false) {
+                return $object;
+            }
+        }
 
+        if (empty($data) || !is_array($data)) {
             return $object;
         }
 
