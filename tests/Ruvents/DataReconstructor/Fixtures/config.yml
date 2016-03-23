@@ -5,4 +5,10 @@ map:
 
     Ruvents\DataReconstructor\Fixtures\TestClass2:
         class3: Ruvents\DataReconstructor\Fixtures\TestClass3
-        date: DateTime
+
+map2:
+    Class:
+        offset: ~
+        offset2: prop
+        offset3: new Class[]
+        offset4: call()

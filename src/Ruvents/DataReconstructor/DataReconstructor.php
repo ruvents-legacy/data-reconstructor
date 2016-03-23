@@ -63,12 +63,12 @@ class DataReconstructor
      */
     protected function reconstructObject($className, $data = null)
     {
-        $object = new $className($data);
+        $object = new $className;
 
         if ($object instanceof ReconstructInterface) {
-            if ($object->reconstruct($data, $this) === false) {
-                return $object;
-            }
+            $object->reconstruct($data, $this);
+
+            return $object;
         }
 
         if (empty($data) || !is_array($data)) {

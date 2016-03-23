@@ -11,7 +11,7 @@ class TestClass2
     /**
      * @var int
      */
-    private $int;
+    public $int;
 
     /**
      * @var \Ruvents\DataReconstructor\Fixtures\TestClass3
@@ -23,13 +23,9 @@ class TestClass2
      */
     public $date;
 
-    /**
-     * @param int $int
-     * @return $this
-     */
-    public function setInt($int)
+    public function setDate($date)
     {
-        $this->int = $int;
+        $this->date = new \DateTime($date);
 
         return $this;
     }
