@@ -6,7 +6,7 @@ It receives a nested associative array and returns a data structure of any compl
 
 ## Installation
 
-`$ composer require ruvents/data-reconstructor:^1.0`
+`$ composer require ruvents/data-reconstructor`
 
 ## Usage
 
@@ -217,9 +217,9 @@ object(Model\Band)[3]
 
 ## Property Access
 
-Data constructor uses [The Symfony PropertyAccess Component](http://symfony.com/doc/current/components/property_access/index.html) to access the properies of a constructed class.
+Data constructor uses [The Symfony PropertyAccess Component](http://symfony.com/doc/current/components/property_access/index.html) to access the properies of a constructed class. Along with public properties you can use private and protected properties with appropriate setters or even a magic `__set` method.
 
-This means that along with public properties you can have private and protected properies with appropriate setters or even a magic `__set` method:
+Setters have higher priority, which means that if a public property has a setter method, the Property Access Component will use the setter instead of writing to the property directly.
 
 ```php
 <?php
