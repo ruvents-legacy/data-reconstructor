@@ -217,9 +217,9 @@ object(Model\Band)[3]
 
 ## Property Access
 
-Data constructor uses [The Symfony PropertyAccess Component](http://symfony.com/doc/current/components/property_access/index.html) to access the properies of a constructed class. Along with public properties you can use private and protected properties with appropriate setters or even a magic `__set` method.
+At first, Data Constructor looks for a setter method (`$setterMethodName = 'set'.ucfirst($propertyName)`). If such `method_exists`, it is used to write data. Otherwise, library checks whether `property_exists`.
 
-Setters have higher priority, which means that if a public property has a setter method, the Property Access Component will use the setter instead of writing to the property directly.
+We have decided not to use reflection for better performance. Thus, accessibility of setters and properties is not checked. **You must make setters and properties without setters public (or use magic `__set`).**
 
 ```php
 <?php
@@ -259,8 +259,6 @@ class Instrument
     }
 }
 ```
-
-Nonexistent and nonaccesible properties will not be filled with data without throwing any errors.
 
 ## Gain control over the whole process
 

@@ -4,29 +4,23 @@ namespace Ruvents\DataReconstructor;
 
 class DataReconstructorTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var DataReconstructor
-     */
-    private $reconstructor;
-
-    public function setUp()
+    public function testNoOptions()
     {
-        $this->reconstructor = new DataReconstructor();
-    }
+        $reconstructor = new DataReconstructor();
 
-    public function testSimpleClass()
-    {
         $className = 'Ruvents\DataReconstructor\Fixtures\TestClass';
         $data = [
-            'property1' => 'value1',
-            'property2' => 'value2',
-            'property3' => 'value3',
+            'publicProperty' => 'publicValue',
+            'setterProperty' => 'Value',
+            'magicProperty' => 'Value',
+            'nonexistentProperty' => 'nonexistentValue',
         ];
 
-        $object = $this->reconstructor->reconstruct($data, $className);
+        $object = $reconstructor->reconstruct($data, $className);
 
-        for ($i = 1; $i <= 3; $i++) {
-            $this->assertAttributeEquals($data["property$i"], "property$i", $object);
-        }
+        $this->assertAttributeEquals('publicValue', 'publicProperty', $object);
+        $this->assertAttributeEquals('setterValue', 'setterProperty', $object);
+        $this->assertAttributeEquals('magicValue', 'magicProperty', $object);
+        $this->assertObjectNotHasAttribute('nonexistentProperty', $object);
     }
 }

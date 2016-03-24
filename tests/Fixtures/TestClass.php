@@ -4,19 +4,21 @@ namespace Ruvents\DataReconstructor\Fixtures;
 
 class TestClass
 {
-    public $property1;
+    public $publicProperty;
 
-    private $property2;
+    private $setterProperty;
 
-    protected $property3;
+    protected $magicProperty;
 
-    public function setProperty2($property2)
+    public function setSetterProperty($value)
     {
-        $this->property2 = $property2;
+        $this->setterProperty = 'setter'.$value;
     }
 
     public function __set($property, $value)
     {
-        $this->$property = $value;
+        if ($property === 'magicProperty') {
+            $this->$property = 'magic'.$value;
+        }
     }
 }

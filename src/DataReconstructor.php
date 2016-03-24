@@ -2,9 +2,6 @@
 
 namespace Ruvents\DataReconstructor;
 
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
-
 /**
  * Class DataReconstructor
  * @package Ruvents\DataReconstructor
@@ -19,17 +16,11 @@ class DataReconstructor
     ];
 
     /**
-     * @var PropertyAccessor
-     */
-    protected $propertyAccessor;
-
-    /**
      * @param array $options
      */
     public function __construct(array $options = [])
     {
         $this->options = array_replace_recursive($this->options, $options);
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     /**
@@ -120,12 +111,16 @@ class DataReconstructor
      */
     protected function writeProperty($object, $property, $value, $propertyClassName)
     {
-        if (!$this->propertyAccessor->isWritable($object, $property)) {
-            return;
+        $setter = 'set'.ucfirst($property);
+
+        switch (true) {
+            case method_exists($object, $setter):
+                $object->$setter($this->reconstruct($value, $propertyClassName));
+                break;
+
+            case property_exists($object, $property):
+                $object->$property = $this->reconstruct($value, $propertyClassName);
+                break;
         }
-
-        $value = $this->reconstruct($value, $propertyClassName);
-
-        $this->propertyAccessor->setValue($object, $property, $value);
     }
 }
