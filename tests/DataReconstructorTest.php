@@ -2,16 +2,16 @@
 
 namespace Ruvents\DataReconstructor;
 
-use Symfony\Component\Yaml\Yaml;
-
 class DataReconstructorTest extends \PHPUnit_Framework_TestCase
 {
-    private function createReconstructor($configName = 'config')
-    {
-        $configContents = file_get_contents(__DIR__."/Fixtures/$configName.yml");
-        $config = Yaml::parse($configContents);
+    /**
+     * @var DataReconstructor
+     */
+    private $reconstructor;
 
-        return new DataReconstructor($config);
+    public function setUp()
+    {
+        $this->reconstructor = new DataReconstructor();
     }
 
     public function testSimpleClass()
@@ -23,7 +23,7 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
             'property3' => 'value3',
         ];
 
-        $object = $this->createReconstructor()->reconstruct($data, $className);
+        $object = $this->reconstructor->reconstruct($data, $className);
 
         for ($i = 1; $i <= 3; $i++) {
             $this->assertAttributeEquals($data["property$i"], "property$i", $object);

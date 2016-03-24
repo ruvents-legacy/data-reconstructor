@@ -39,7 +39,7 @@ class DataReconstructor
     {
         return $this->options;
     }
-    
+
     /**
      * @param string $className
      * @return array
@@ -54,7 +54,7 @@ class DataReconstructor
 
         return [];
     }
-    
+
     /**
      * @param mixed  $data
      * @param string $className

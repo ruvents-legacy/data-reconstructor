@@ -8,7 +8,7 @@ class TestClass
 
     private $property2;
 
-    private $property3;
+    protected $property3;
 
     public function setProperty2($property2)
     {
