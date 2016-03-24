@@ -28,7 +28,7 @@ class DataReconstructor
      */
     public function __construct(array $options = [])
     {
-        $this->options = array_merge_recursive($this->options, $options);
+        $this->options = array_replace_recursive($this->options, $options);
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
