@@ -2,6 +2,8 @@
 
 namespace Ruvents\DataReconstructor;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 /**
  * Class DataReconstructor
  * @package Ruvents\DataReconstructor
@@ -11,16 +13,17 @@ class DataReconstructor
     /**
      * @var array
      */
-    protected $options = [
-        'map' => [],
-    ];
+    protected $options;
 
     /**
      * @param array $options
      */
     public function __construct(array $options = [])
     {
-        $this->options = array_replace_recursive($this->options, $options);
+        $resolver = new OptionsResolver();
+        $this->configureOptions($resolver);
+
+        $this->options = $resolver->resolve($options);
     }
 
     /**
@@ -29,6 +32,16 @@ class DataReconstructor
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * @param OptionsResolver $resolver
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver
+            ->setDefaults(['map' => []])
+            ->setAllowedTypes('map', 'array');
     }
 
     /**
