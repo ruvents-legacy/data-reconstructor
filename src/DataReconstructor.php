@@ -2,6 +2,7 @@
 
 namespace Ruvents\DataReconstructor;
 
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -14,6 +15,11 @@ class DataReconstructor
      * @var array
      */
     protected $options;
+
+    /**
+     * @var array
+     */
+    protected static $defaults = ['map' => []];
 
     /**
      * @param array $options
@@ -39,8 +45,12 @@ class DataReconstructor
      */
     protected function configureOptions(OptionsResolver $resolver)
     {
+        /** @noinspection PhpUnusedParameterInspection */
         $resolver
-            ->setDefaults(['map' => []])
+            ->setDefaults(static::$defaults)
+            ->setNormalizer('map', function (Options $options, $value) {
+                return array_replace(static::$defaults['map'], $value);
+            })
             ->setAllowedTypes('map', 'array');
     }
 
