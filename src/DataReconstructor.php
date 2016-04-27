@@ -76,12 +76,12 @@ class DataReconstructor
      */
     public function reconstruct($data, $className = null)
     {
-        if (!isset($className)) {
+        if (empty($data) || empty($className)) {
             return $data;
         }
 
         // Class[]
-        if (substr($className, -2) === '[]') {
+        if ('[]' === substr($className, -2)) {
             $className = substr($className, 0, -2);
             $map = $this->getClassMap($className);
 
