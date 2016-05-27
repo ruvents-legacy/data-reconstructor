@@ -72,39 +72,48 @@ class DataReconstructor
     public function reconstruct($data, $className)
     {
         if ('[]' === substr($className, -2)) {
-            $className = substr($className, 0, -2);
-            $newData = [];
-
-            foreach ($data as $key => $value) {
-                $newValue = $this->reconstructObject($value, $className);
-
-                if (isset($newValue)) {
-                    $newData[$key] = $newValue;
-                }
-            }
-
-            return $newData;
+            return is_array($data) ? $this->reconstructArray($data, $className) : [];
         }
 
         return $this->reconstructObject($data, $className);
     }
 
     /**
+     * @param array  $array
+     * @param string $className
+     * @return array
+     */
+    protected function reconstructArray(array $array, $className)
+    {
+        $className = substr($className, 0, -2);
+        $newData = [];
+
+        foreach ($array as $key => $data) {
+            $newValue = $this->reconstructObject($data, $className);
+
+            if (isset($newValue)) {
+                $newData[$key] = $newValue;
+            }
+        }
+
+        return $newData;
+    }
+
+    /**
      * @param mixed  $data
      * @param string $className
-     * @return null|object
+     * @return object
      */
     protected function reconstructObject($data, $className)
     {
         $map = isset($this->options['map'][$className]) ? $this->options['map'][$className] : [];
-        $object = $this->createObject($className, $data, $map);
 
-        if (!$object) {
+        if (!$object = $this->createObject($className, $data, $map)) {
             return null;
         }
 
         foreach ($data as $property => $value) {
-            $accessType = $this->getAccessType($className, $property);
+            $accessType = $this->getAccessType($object, $property);
 
             if (!$accessType) {
                 continue;
@@ -124,7 +133,7 @@ class DataReconstructor
      * @param string $className
      * @param mixed  $data
      * @param array  $map
-     * @return \DateTime|ReconstructableInterface|object|null
+     * @return object|null
      */
     protected function createObject($className, &$data, array $map)
     {
@@ -150,26 +159,28 @@ class DataReconstructor
     }
 
     /**
-     * @param string|object $className
-     * @param string        $property
+     * @param object $object
+     * @param string $property
      * @return string
      */
-    protected function getAccessType($className, $property)
+    protected function getAccessType($object, $property)
     {
+        $className = get_class($object);
+
         if (!isset(self::$accessTypes[$className][$property])) {
-            $reflection = new \ReflectionClass($className);
+            $reflection = new \ReflectionClass($object);
             $setter = 'set'.ucfirst($property);
 
             switch (true) {
-                case method_exists($className, $setter) && $reflection->getMethod($setter)->isPublic():
+                case $reflection->hasMethod($setter) && $reflection->getMethod($setter)->isPublic():
                     $accessType = self::ACCESS_TYPE_SETTER;
                     break;
 
-                case property_exists($className, $property) && $reflection->getProperty($property)->isPublic():
+                case $reflection->hasProperty($property) && $reflection->getProperty($property)->isPublic():
                     $accessType = self::ACCESS_TYPE_PROPERTY;
                     break;
 
-                case method_exists($className, '__set'):
+                case $reflection->hasMethod('__set'):
                     $accessType = self::ACCESS_TYPE_MAGIC;
                     break;
 
