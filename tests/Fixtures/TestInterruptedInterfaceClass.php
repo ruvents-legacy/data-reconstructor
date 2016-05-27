@@ -3,9 +3,9 @@
 namespace Ruvents\DataReconstructor\Fixtures;
 
 use Ruvents\DataReconstructor\DataReconstructor;
-use Ruvents\DataReconstructor\ReconstructInterface;
+use Ruvents\DataReconstructor\ReconstructableInterface;
 
-class TestInterruptedInterfaceClass implements ReconstructInterface
+class TestInterruptedInterfaceClass implements ReconstructableInterface
 {
     public $property;
     

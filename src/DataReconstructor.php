@@ -105,14 +105,6 @@ class DataReconstructor
         $map = $this->getClassMap($className);
 
         if ($object instanceof ReconstructableInterface) {
-            if ($object instanceof ReconstructInterface) {
-                @trigger_error(
-                    sprintf('Interface %1$s\\ReconstructInterface is deprecated since version 1.0.8 and will be removed in version 2.0.0. Use %1$s\\ReconstructableInterface instead.',
-                        __NAMESPACE__),
-                    E_USER_DEPRECATED
-                );
-            }
-
             if (false === $object->reconstruct($this, $data, $map)) {
                 return $object;
             }
