@@ -27,11 +27,6 @@ class DataReconstructor
     protected static $defaults = ['map' => []];
 
     /**
-     * @var \ReflectionClass[]
-     */
-    protected static $reflections = [];
-
-    /**
      * @var string[][]
      */
     protected static $accessTypes = [];
@@ -45,14 +40,6 @@ class DataReconstructor
         $this->configureOptions($resolver);
 
         $this->options = $resolver->resolve($options);
-    }
-
-    /**
-     * @return array
-     */
-    public function getOptions()
-    {
-        return $this->options;
     }
 
     /**
@@ -70,18 +57,11 @@ class DataReconstructor
     }
 
     /**
-     * @param string $className
      * @return array
      */
-    protected function getClassMap($className)
+    public function getOptions()
     {
-        $className = ltrim($className, '\\');
-
-        if (isset($this->options['map'][$className])) {
-            return $this->options['map'][$className];
-        }
-
-        return [];
+        return $this->options;
     }
 
     /**
@@ -89,39 +69,40 @@ class DataReconstructor
      * @param string $className
      * @return mixed
      */
-    public function reconstruct($data, $className = null)
+    public function reconstruct($data, $className)
     {
-        if (empty($data) || empty($className)) {
-            return $data;
+        if (!is_array($data)) {
+            return null;
         }
 
-        // Class[]
+        // $className = 'Class[]'
         if ('[]' === substr($className, -2)) {
             $className = substr($className, 0, -2);
-            $map = $this->getClassMap($className);
+            $newData = [];
 
-            foreach ($data as &$value) {
-                $value = $this->reconstructObject($value, $className, $map);
+            foreach ($data as $key => $value) {
+                if (is_array($value)) {
+                    $newData[$key] = $this->reconstructObject($value, $className);
+                }
             }
 
-            return $data;
+            unset($data);
+
+            return $newData;
         }
 
-        // Class
-        $map = $this->getClassMap($className);
-
-        return $this->reconstructObject($data, $className, $map);
+        return $this->reconstructObject($data, $className);
     }
 
     /**
      * @param mixed  $data
      * @param string $className
-     * @param array  $map
      * @return object
      */
-    protected function reconstructObject($data, $className, array $map)
+    protected function reconstructObject($data, $className)
     {
-        $object = new $className;
+        $object = $this->createObject($className);
+        $map = $this->getClassMap($className);
 
         if ($object instanceof ReconstructableInterface) {
             if ($object instanceof ReconstructInterface) {
@@ -137,19 +118,43 @@ class DataReconstructor
             }
         }
 
-        if (empty($data) || !is_array($data)) {
-            return $object;
-        }
-
         foreach ($data as $property => $value) {
-            $propertyClassName = isset($map[$property]) ? $map[$property] : null;
             $accessType = $this->getAccessType($className, $property);
-            if ($accessType) {
-                $this->writeProperty($object, $property, $value, $accessType, $propertyClassName);
+
+            if (!$accessType) {
+                continue;
             }
+            
+            if (isset($map[$property])) {
+                $value = $this->reconstruct($value, $map[$property]);
+            }
+            
+            $this->writeProperty($object, $property, $value, $accessType);
         }
 
         return $object;
+    }
+
+    /**
+     * @param string $className
+     * @return object
+     */
+    protected function createObject($className)
+    {
+        return new $className();
+    }
+
+    /**
+     * @param string $className
+     * @return array
+     */
+    protected function getClassMap($className)
+    {
+        if (isset($this->options['map'][$className])) {
+            return $this->options['map'][$className];
+        }
+
+        return [];
     }
 
     /**
@@ -191,24 +196,21 @@ class DataReconstructor
      * @param string $property
      * @param mixed  $value
      * @param string $accessType
-     * @param string $propertyClassName
      */
-    protected function writeProperty($object, $property, $value, $accessType, $propertyClassName)
+    protected function writeProperty($object, $property, $value, $accessType)
     {
-        $reconstructedValue = $this->reconstruct($value, $propertyClassName);
-
         switch ($accessType) {
             case self::ACCESS_TYPE_SETTER:
                 $setter = 'set'.ucfirst($property);
-                $object->$setter($reconstructedValue);
+                $object->$setter($value);
                 break;
 
             case self::ACCESS_TYPE_PROPERTY:
-                $object->$property = $reconstructedValue;
+                $object->$property = $value;
                 break;
 
             case self::ACCESS_TYPE_MAGIC:
-                $object->__set($reconstructedValue);
+                $object->__set($property, $value);
         }
     }
 }
