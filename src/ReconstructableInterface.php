@@ -8,10 +8,9 @@ namespace Ruvents\DataReconstructor;
 interface ReconstructableInterface
 {
     /**
-     * @param DataReconstructor $dataReconstructor
      * @param mixed             $data
+     * @param DataReconstructor $dataReconstructor
      * @param array             $map
-     * @return false|void
      */
-    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map);
+    public function __construct(&$data, DataReconstructor $dataReconstructor, array $map);
 }

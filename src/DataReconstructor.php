@@ -67,26 +67,21 @@ class DataReconstructor
     /**
      * @param mixed  $data
      * @param string $className
-     * @return mixed
+     * @return null|object|object[]
      */
     public function reconstruct($data, $className)
     {
-        if (!is_array($data)) {
-            return null;
-        }
-
-        // $className = 'Class[]'
         if ('[]' === substr($className, -2)) {
             $className = substr($className, 0, -2);
             $newData = [];
 
             foreach ($data as $key => $value) {
-                if (is_array($value)) {
-                    $newData[$key] = $this->reconstructObject($value, $className);
+                $newValue = $this->reconstructObject($value, $className);
+
+                if (isset($newValue)) {
+                    $newData[$key] = $newValue;
                 }
             }
-
-            unset($data);
 
             return $newData;
         }
@@ -97,17 +92,15 @@ class DataReconstructor
     /**
      * @param mixed  $data
      * @param string $className
-     * @return object
+     * @return null|object
      */
     protected function reconstructObject($data, $className)
     {
-        $object = $this->createObject($className);
-        $map = $this->getClassMap($className);
+        $map = isset($this->options['map'][$className]) ? $this->options['map'][$className] : [];
+        $object = $this->createObject($className, $data, $map);
 
-        if ($object instanceof ReconstructableInterface) {
-            if (false === $object->reconstruct($this, $data, $map)) {
-                return $object;
-            }
+        if (!$object) {
+            return null;
         }
 
         foreach ($data as $property => $value) {
@@ -116,11 +109,11 @@ class DataReconstructor
             if (!$accessType) {
                 continue;
             }
-            
+
             if (isset($map[$property])) {
                 $value = $this->reconstruct($value, $map[$property]);
             }
-            
+
             $this->writeProperty($object, $property, $value, $accessType);
         }
 
@@ -129,24 +122,31 @@ class DataReconstructor
 
     /**
      * @param string $className
-     * @return object
+     * @param mixed  $data
+     * @param array  $map
+     * @return \DateTime|ReconstructableInterface|object|null
      */
-    protected function createObject($className)
+    protected function createObject($className, &$data, array $map)
     {
-        return new $className();
-    }
+        $reflection = new \ReflectionClass($className);
 
-    /**
-     * @param string $className
-     * @return array
-     */
-    protected function getClassMap($className)
-    {
-        if (isset($this->options['map'][$className])) {
-            return $this->options['map'][$className];
+        switch (true) {
+            case $reflection->implementsInterface(__NAMESPACE__.'\\ReconstructableInterface'):
+                return new $className($data, $this, $map);
+
+            case $className === 'DateTime' && is_string($data):
+            case $reflection->isSubclassOf('DateTime') && is_string($data):
+                $object = new \DateTime($data);
+                $data = [];
+
+                return $object;
+
+            case is_array($data):
+                return new $className;
+
+            default:
+                return null;
         }
-
-        return [];
     }
 
     /**

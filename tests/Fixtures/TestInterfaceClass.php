@@ -9,7 +9,7 @@ class TestInterfaceClass implements ReconstructableInterface
 {
     public $property;
     
-    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map)
+    public function __construct(&$data, DataReconstructor $dataReconstructor, array $map)
     {
         $data['property'] = 'changed';
     }

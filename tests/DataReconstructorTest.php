@@ -23,6 +23,17 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
         $this->assertObjectNotHasAttribute('nonexistentProperty', $object);
     }
 
+    public function testDateTime()
+    {
+        $reconstructor = new DataReconstructor();
+
+        $date = date('c');
+
+        $object = $reconstructor->reconstruct($date, 'DateTime');
+
+        $this->assertEquals($date, $object->format('c'));
+    }
+
     public function testInterface()
     {
         $reconstructor = new DataReconstructor();
@@ -32,18 +43,6 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
         $object = $reconstructor->reconstruct($data, $className);
 
         $this->assertAttributeEquals('changed', 'property', $object);
-    }
-
-    public function testInterfaceInterrupted()
-    {
-        $reconstructor = new DataReconstructor();
-        $className = __NAMESPACE__.'\Fixtures\TestInterruptedInterfaceClass';
-        $data = ['property' => 'propertyValue', 'emptyProperty' => 'emptyPropertyValue'];
-
-        $object = $reconstructor->reconstruct($data, $className);
-
-        $this->assertAttributeEquals('propertyValue', 'property', $object);
-        $this->assertAttributeEmpty('emptyProperty', $object);
     }
 
     public function testNestedClasses()
