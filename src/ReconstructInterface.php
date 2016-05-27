@@ -4,15 +4,8 @@ namespace Ruvents\DataReconstructor;
 
 /**
  * Interface ReconstructInterface
- * @package Ruvents\DataReconstructor
+ * @deprecated interface is deprecated since version 1.0.8 and will be removed in version 2.0.0
  */
-interface ReconstructInterface
+interface ReconstructInterface extends ReconstructableInterface
 {
-    /**
-     * @param DataReconstructor $dataReconstructor
-     * @param mixed             $data
-     * @param array             $map
-     * @return false|void
-     */
-    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map);
 }

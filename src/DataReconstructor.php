@@ -7,10 +7,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class DataReconstructor
- * @package Ruvents\DataReconstructor
  */
 class DataReconstructor
 {
+    const ACCESS_TYPE_SETTER = 'setter';
+
+    const ACCESS_TYPE_PROPERTY = 'property';
+
+    const ACCESS_TYPE_MAGIC = 'magic';
+
     /**
      * @var array
      */
@@ -20,6 +25,16 @@ class DataReconstructor
      * @var array
      */
     protected static $defaults = ['map' => []];
+
+    /**
+     * @var \ReflectionClass[]
+     */
+    protected static $reflections = [];
+
+    /**
+     * @var string[][]
+     */
+    protected static $accessTypes = [];
 
     /**
      * @param array $options
@@ -108,7 +123,15 @@ class DataReconstructor
     {
         $object = new $className;
 
-        if ($object instanceof ReconstructInterface) {
+        if ($object instanceof ReconstructableInterface) {
+            if ($object instanceof ReconstructInterface) {
+                @trigger_error(
+                    sprintf('Interface %1$s\\ReconstructInterface is deprecated since version 1.0.8 and will be removed in version 2.0.0. Use %1$s\\ReconstructableInterface instead.',
+                        __NAMESPACE__),
+                    E_USER_DEPRECATED
+                );
+            }
+
             if (false === $object->reconstruct($this, $data, $map)) {
                 return $object;
             }
@@ -120,30 +143,72 @@ class DataReconstructor
 
         foreach ($data as $property => $value) {
             $propertyClassName = isset($map[$property]) ? $map[$property] : null;
-            $this->writeProperty($object, $property, $value, $propertyClassName);
+            $accessType = $this->getAccessType($className, $property);
+            if ($accessType) {
+                $this->writeProperty($object, $property, $value, $accessType, $propertyClassName);
+            }
         }
 
         return $object;
     }
 
     /**
+     * @param string|object $className
+     * @param string        $property
+     * @return string
+     */
+    protected function getAccessType($className, $property)
+    {
+        if (!isset(self::$accessTypes[$className][$property])) {
+            $reflection = new \ReflectionClass($className);
+            $setter = 'set'.ucfirst($property);
+
+            switch (true) {
+                case method_exists($className, $setter) && $reflection->getMethod($setter)->isPublic():
+                    $accessType = self::ACCESS_TYPE_SETTER;
+                    break;
+
+                case property_exists($className, $property) && $reflection->getProperty($property)->isPublic():
+                    $accessType = self::ACCESS_TYPE_PROPERTY;
+                    break;
+
+                case method_exists($className, '__set'):
+                    $accessType = self::ACCESS_TYPE_MAGIC;
+                    break;
+
+                default:
+                    $accessType = false;
+            }
+
+            self::$accessTypes[$className][$property] = $accessType;
+        }
+
+        return self::$accessTypes[$className][$property];
+    }
+
+    /**
      * @param object $object
      * @param string $property
      * @param mixed  $value
+     * @param string $accessType
      * @param string $propertyClassName
      */
-    protected function writeProperty($object, $property, $value, $propertyClassName)
+    protected function writeProperty($object, $property, $value, $accessType, $propertyClassName)
     {
-        $setter = 'set'.ucfirst($property);
+        $reconstructedValue = $this->reconstruct($value, $propertyClassName);
 
-        switch (true) {
-            case method_exists($object, $setter):
-                $object->$setter($this->reconstruct($value, $propertyClassName));
+        switch ($accessType) {
+            case self::ACCESS_TYPE_SETTER:
+                $setter = 'set'.ucfirst($property);
+                $object->$setter($reconstructedValue);
                 break;
 
-            case property_exists($object, $property):
-                $object->$property = $this->reconstruct($value, $propertyClassName);
+            case self::ACCESS_TYPE_PROPERTY:
+                $object->$property = $reconstructedValue;
                 break;
+
+            case self::ACCESS_TYPE_MAGIC:
+                $object->__set($reconstructedValue);
         }
     }
 }
