@@ -8,22 +8,12 @@ It receives a nested associative array and returns a data structure of any compl
 
 `$ composer require ruvents/data-reconstructor`
 
-## Usage
+## Configuration & usage
 
 ```php
 <?php
 
 use Ruvents\DataReconstructor\DataReconstructor;
-
-$reconstructor = new DataReconstructor($config);
-
-$data = $reconstructor->reconstruct($assocArrayOfRawData, 'Namespace\InitialClassName');
-```
-
-## Configuration
-
-```php
-<?php
 
 $config = [
     'map' => [
@@ -37,6 +27,10 @@ $config = [
         // ...
     ],
 ];
+
+$reconstructor = new DataReconstructor($config);
+
+$data = $reconstructor->reconstruct($assocArrayOfRawData, 'Namespace\InitialClassName');
 ```
 
 ## Example
@@ -217,9 +211,15 @@ object(Model\Band)[3]
 
 ## Property Access
 
-At first, Data Constructor looks for a setter method (`$setterMethodName = 'set'.ucfirst($propertyName)`). If such `method_exists`, it is used to write data. Otherwise, library checks whether `property_exists`.
+When writing data to a property, reconstructor consistently tries each of the following approaches:
 
-We have decided not to use reflection for better performance. Thus, accessibility of setters and properties is not checked. **You must make setters and properties without setters public (or use magic `__set`).**
+1. if setter method (`$setterMethodName = 'set'.ucfirst($propertyName)`) exists and is publicly available, pass value to the setter;
+
+2. if property itself exists and is publicly available, set the value directly;
+
+3. if magic `__set()` method exists, pass value to the magic method directly;
+
+4. skip the property.
 
 ```php
 <?php
@@ -262,27 +262,38 @@ class Instrument
 
 ## Gain control over the whole process
 
-If you wish to use your own logic, you can implement the `Ruvents\DataReconstructor\ReconstructInterface` interface:
+If you want to use your own logic, you can implement the `Ruvents\DataReconstructor\ReconstructableInterface` interface:
 
 ```php
 <?php
 
 namespace Model;
 
-use Ruvents\DataReconstructor\ReconstructInterface;
+use Ruvents\DataReconstructor\ReconstructableInterface;
 use Ruvents\DataReconstructor\DataReconstructor;
 
-class Musician implements ReconstructInterface
+class Musician implements ReconstructableInterface
 {
     /**
      * @inheritdoc
      */
-    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map) {
+    public function __construct(&$data, DataReconstructor $dataReconstructor, array $map) {
         $data['name'] = 'Cool guy Mr. '.$data['name'];
     }
 }
+```
 
-class Instrument implements ReconstructInterface
+Make `$data` an empty array to finish reconstruction of the current object.
+
+```php
+<?php
+
+namespace Model;
+
+use Ruvents\DataReconstructor\ReconstructableInterface;
+use Ruvents\DataReconstructor\DataReconstructor;
+
+class Instrument implements ReconstructableInterface
 {
     /**
      * @var int
@@ -292,14 +303,12 @@ class Instrument implements ReconstructInterface
     /**
      * @inheritdoc
      */
-    public function reconstruct(DataReconstructor $dataReconstructor, &$data, array $map) {
+    public function __construct(&$data, DataReconstructor $dataReconstructor, array $map) {
         $this->id = (int)$data['id'];
 
-        return false;
+        $data = [];
     }
 }
 ```
 
-Return `false` to finish reconstruction of the current object.
-
-You can also use `$dataReconstructor->reconstruct($data, $className)` to reconstruct other pieces of data from inside the implemented method.
+You can also use `$dataReconstructor->reconstruct($data, $className)` to reconstruct other pieces of data from inside the constructor.
