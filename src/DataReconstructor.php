@@ -24,17 +24,17 @@ class DataReconstructor
     /**
      * @var array
      */
-    protected static $defaults = ['map' => []];
+    protected static $defaults = array('map' => array());
 
     /**
      * @var string[][]
      */
-    protected static $accessTypes = [];
+    protected static $accessTypes = array();
 
     /**
      * @param array $options
      */
-    public function __construct(array $options = [])
+    public function __construct(array $options = array())
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
@@ -47,11 +47,13 @@ class DataReconstructor
      */
     protected function configureOptions(OptionsResolver $resolver)
     {
+        $defaults = static::$defaults;
+
         /** @noinspection PhpUnusedParameterInspection */
         $resolver
             ->setDefaults(static::$defaults)
-            ->setNormalizer('map', function (Options $options, $value) {
-                return array_replace(static::$defaults['map'], $value);
+            ->setNormalizer('map', function (Options $options, $value) use ($defaults) {
+                return array_replace($defaults['map'], $value);
             })
             ->setAllowedTypes('map', 'array');
     }
@@ -72,7 +74,7 @@ class DataReconstructor
     public function reconstruct($data, $className)
     {
         if ('[]' === substr($className, -2)) {
-            return is_array($data) ? $this->reconstructArray($data, $className) : [];
+            return is_array($data) ? $this->reconstructArray($data, $className) : array();
         }
 
         return $this->reconstructObject($data, $className);
@@ -86,7 +88,7 @@ class DataReconstructor
     protected function reconstructArray(array $array, $className)
     {
         $className = substr($className, 0, -2);
-        $newData = [];
+        $newData = array();
 
         foreach ($array as $key => $data) {
             $newValue = $this->reconstructObject($data, $className);
@@ -106,7 +108,7 @@ class DataReconstructor
      */
     protected function reconstructObject($data, $className)
     {
-        $map = isset($this->options['map'][$className]) ? $this->options['map'][$className] : [];
+        $map = isset($this->options['map'][$className]) ? $this->options['map'][$className] : array();
 
         if (!$object = $this->createObject($className, $data, $map)) {
             return null;
@@ -146,7 +148,7 @@ class DataReconstructor
             case $className === 'DateTime' && is_string($data):
             case $reflection->isSubclassOf('DateTime') && is_string($data):
                 $object = new \DateTime($data);
-                $data = [];
+                $data = array();
 
                 return $object;
 

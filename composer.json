@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=5.3.9",
         "symfony/options-resolver": "^2.8||^3.0"
     },
     "autoload": {
@@ -24,6 +24,11 @@
         }
     },
     "minimum-stability": "dev",
+    "config": {
+        "platform": {
+            "php": "5.3.9"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "2.0-dev"

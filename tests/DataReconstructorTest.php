@@ -8,12 +8,12 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
     {
         $reconstructor = new DataReconstructor();
         $className = __NAMESPACE__.'\Fixtures\TestClass';
-        $data = [
+        $data = array(
             'publicProperty' => 'publicValue',
             'setterProperty' => 'Value',
             'magicProperty' => 'Value',
             'nonexistentProperty' => 'nonexistentValue',
-        ];
+        );
 
         $object = $reconstructor->reconstruct($data, $className);
 
@@ -38,7 +38,7 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
     {
         $reconstructor = new DataReconstructor();
         $className = __NAMESPACE__.'\Fixtures\TestInterfaceClass';
-        $data = ['property' => 'value'];
+        $data = array('property' => 'value');
 
         $object = $reconstructor->reconstruct($data, $className);
 
@@ -47,23 +47,23 @@ class DataReconstructorTest extends \PHPUnit_Framework_TestCase
 
     public function testNestedClasses()
     {
-        $reconstructor = new DataReconstructor(['map' => [
-            __NAMESPACE__.'\Fixtures\TestClassLevel1' => [
+        $reconstructor = new DataReconstructor(array('map' => array(
+            __NAMESPACE__.'\Fixtures\TestClassLevel1' => array(
                 'level2' => __NAMESPACE__.'\Fixtures\TestClassLevel2',
-            ],
-            __NAMESPACE__.'\Fixtures\TestClassLevel2' => [
+            ),
+            __NAMESPACE__.'\Fixtures\TestClassLevel2' => array(
                 'level2' => __NAMESPACE__.'\Fixtures\TestClassLevel3[]',
-            ],
-        ]]);
+            ),
+        )));
 
-        $object = $reconstructor->reconstruct([
-            'level2' => [
-                'level3' => [
-                    ['property' => 0],
-                    ['property' => 1],
-                ],
-            ],
-        ], __NAMESPACE__.'\Fixtures\TestClassLevel1');
+        $object = $reconstructor->reconstruct(array(
+            'level2' => array(
+                'level3' => array(
+                    array('property' => 0),
+                    array('property' => 1),
+                ),
+            ),
+        ), __NAMESPACE__.'\Fixtures\TestClassLevel1');
 
         $this->assertEquals(0, $object->level2->level3[0]['property']);
         $this->assertEquals(1, $object->level2->level3[1]['property']);
