@@ -69,7 +69,7 @@ class DataReconstructor
     /**
      * @param mixed  $data
      * @param string $className
-     * @return null|object|object[]
+     * @return mixed
      */
     public function reconstruct($data, $className)
     {
@@ -104,7 +104,7 @@ class DataReconstructor
     /**
      * @param mixed  $data
      * @param string $className
-     * @return object
+     * @return mixed
      */
     protected function reconstructObject($data, $className)
     {
