@@ -10,12 +10,11 @@
         }
     ],
     "require": {
-        "php": ">=5.3.9",
-        "symfony/options-resolver": "^2.8||^3.0"
+        "php": ">=5.4.0"
     },
     "autoload": {
         "psr-4": {
-            "Ruvents\\DataReconstructor\\": "src/"
+            "Ruvents\\DataReconstructor\\": "lib/"
         }
     },
     "autoload-dev": {
@@ -26,12 +25,12 @@
     "minimum-stability": "dev",
     "config": {
         "platform": {
-            "php": "5.3.9"
+            "php": "5.4.0"
         }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0-dev"
+            "dev-master": "3.0-dev"
         }
     }
 }

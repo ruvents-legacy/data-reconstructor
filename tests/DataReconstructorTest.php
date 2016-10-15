@@ -4,68 +4,54 @@ namespace Ruvents\DataReconstructor;
 
 class DataReconstructorTest extends \PHPUnit_Framework_TestCase
 {
-    public function testSimple()
+    static $flatTypes = ['null', 'bool', 'int', 'float', 'string'];
+
+    static $supportedFlatTypes = ['null', 'boolean', 'bool', 'integer', 'int', 'double', 'float', 'string'];
+
+    /**
+     * @var DataReconstructor
+     */
+    private $dr;
+
+    private $flatValues = [];
+
+    public function setUp()
     {
-        $reconstructor = new DataReconstructor();
-        $className = __NAMESPACE__.'\Fixtures\TestClass';
-        $data = array(
-            'publicProperty' => 'publicValue',
-            'setterProperty' => 'Value',
-            'magicProperty' => 'Value',
-            'nonexistentProperty' => 'nonexistentValue',
+        $this->dr = new DataReconstructor();
+
+        foreach (self::$flatTypes as $flatType) {
+            $value = 'a';
+            $this->flatValues[] = settype($value, $flatType);
+        }
+    }
+
+    public function testFlat()
+    {
+        foreach ($this->flatValues as $flatValue) {
+            foreach (self::$supportedFlatTypes as $type) {
+                $expected = $flatValue;
+                settype($expected, $type);
+
+                $this->assertEquals($expected, $this->dr->reconstruct($flatValue, $type));
+            }
+        }
+    }
+
+    public function testArray()
+    {
+        $array = [[null, '', 4], ['a', []]];
+
+        $this->assertEquals(
+            $array,
+            $this->dr->reconstruct($array, 'array[]')
         );
-
-        $object = $reconstructor->reconstruct($data, $className);
-
-        $this->assertAttributeEquals('publicValue', 'publicProperty', $object);
-        $this->assertAttributeEquals('setterValue', 'setterProperty', $object);
-        $this->assertAttributeEquals('magicValue', 'magicProperty', $object);
-        $this->assertObjectNotHasAttribute('nonexistentProperty', $object);
     }
 
-    public function testDateTime()
+    public function testArrayFlat()
     {
-        $reconstructor = new DataReconstructor();
-
-        $date = date('c');
-
-        $object = $reconstructor->reconstruct($date, 'DateTime');
-
-        $this->assertEquals($date, $object->format('c'));
-    }
-
-    public function testInterface()
-    {
-        $reconstructor = new DataReconstructor();
-        $className = __NAMESPACE__.'\Fixtures\TestInterfaceClass';
-        $data = array('property' => 'value');
-
-        $object = $reconstructor->reconstruct($data, $className);
-
-        $this->assertAttributeEquals('changed', 'property', $object);
-    }
-
-    public function testNestedClasses()
-    {
-        $reconstructor = new DataReconstructor(array('map' => array(
-            __NAMESPACE__.'\Fixtures\TestClassLevel1' => array(
-                'level2' => __NAMESPACE__.'\Fixtures\TestClassLevel2',
-            ),
-            __NAMESPACE__.'\Fixtures\TestClassLevel2' => array(
-                'level2' => __NAMESPACE__.'\Fixtures\TestClassLevel3[]',
-            ),
-        )));
-
-        $object = $reconstructor->reconstruct(array(
-            'level2' => array(
-                'level3' => array(
-                    array('property' => 0),
-                    array('property' => 1),
-                ),
-            ),
-        ), __NAMESPACE__.'\Fixtures\TestClassLevel1');
-
-        $this->assertEquals(0, $object->level2->level3[0]['property']);
-        $this->assertEquals(1, $object->level2->level3[1]['property']);
+        $this->assertEquals(
+            [[0, 0, 1, 2], [3, 4]],
+            $this->dr->reconstruct([[null, '', '1', '2'], ['3', 4]], 'int[][]')
+        );
     }
 }
